@@ -22,10 +22,12 @@ SECRET_KEY = os.environ["SECRET_KEY"]
 # YELP_API_KEY = os.environ["YELP_API_KEY"]
 YELP_API_KEY = os.environ["YELP_API_KEY"]
 
-# Opcionais com default seguro
-DEBUG = os.environ.get("DEBUG", "False") == "True"
+# =========================
+# DEBUG & ALLOWED HOSTS
 
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
+DEBUG = True
+
+ALLOWED_HOSTS = ['*']
 
 
 # =========================

@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Página Inicial{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4">
+    <div class="row gy-4">
+
+
+<div class="row" >
+
+    <div class="col-12 col-lg-5">
+
+        <form action="{% url 'index' %}" method="get" autocomplete="off">
+
+            <h1>
+                <a href="{% url 'index' %}" class="text-primary text-decoration-none">BUSCA LOCAIS</a>
+            </h1>
+
+            <h4>
+                {{ city }}{% if country %} - {{ country }}{% endif %}
+            </h4>
+
+            <div class="form-group mb-2">
+                <input type="text"
+                       name="key"
+                       class="form-control"
+                       placeholder="Digite um termo de busca"
+                       required>
+            </div>
+
+            <div class="form-group mb-2">
+                <input type="text"
+                       name="loc"
+                       class="form-control"
+                       placeholder="Digite uma cidade">
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                Buscar
+            </button>
+
+        </form>
+
+
+        <hr>
+
+        {% if has_error %}
+            <div class="alert alert-danger">
+                Nenhum estabelecimento encontrado em {{ city }}
+            </div>
+
+        {% elif itens.businesses %}
+            <h5>RESULTADOS</h5>
+<div class="list-group" id="resultsList">
+
+    {% for biz in itens.businesses %}
+        {% if biz.coordinates.latitude and biz.coordinates.longitude %}
+            <button
+                type="button"
+                class="list-group-item list-group-item-action"
+                data-lat="{{ biz.coordinates.latitude }}"
+                data-lon="{{ biz.coordinates.longitude }}"
+                data-name="{{ biz.name|escapejs }}"
+            >
+                <strong>{{ biz.name }}</strong><br>
+                <small class="text-muted">{{ city }}</small>
+            </button>
+        {% endif %}
+    {% endfor %}
+    
+
+</div>
+
+        {% endif %}
+
+    </div>
+
+    {% if itens.businesses|length > 0 %}
+        {% include "maps.html" %}
+    {% endif %}
+</div>
+</div>
+</div>
+{% endblock %}
