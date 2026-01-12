@@ -14,7 +14,11 @@ def yelp_search(keyword=None, location=None):
     If no keyword or location is provided,
     defaults to searching for 'Pizzaria' in 'João Pessoa'.
     """
-
+    if not settings.YELP_API_KEY:
+        return {
+            "error": "API key do Yelp não configurada"
+        }
+    
     headers = {"Authorization": "Bearer " + settings.YELP_API_KEY}
 
     if keyword and location:
@@ -23,7 +27,7 @@ def yelp_search(keyword=None, location=None):
         params = {'term': 'Pizzaria', 'location': 'João Pessoa'}
 
     response = requests.get(YELP_SEARCH_ENDPOINT,
-                            headers=headers, params=params)
+                            headers=headers, params=params, timeout=5)
 
     return response.json()
 

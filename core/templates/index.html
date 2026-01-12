@@ -2,84 +2,149 @@
 {% block title %}Página Inicial{% endblock %}
 
 {% block content %}
-
-<div class="container mt-4">
+<div class="container mt-3">
     <div class="row gy-4">
 
+        <!-- COLUNA ESQUERDA -->
+        <div class="col-12 col-lg-5">
 
-<div class="row" >
+            <form action="{% url 'index' %}" method="get" autocomplete="off">
+                <h1>
+                    <a href="{% url 'index' %}" class="text-primary text-decoration-none">
+                        BUSCA LOCAIS
+                    </a>
+                </h1>
 
-    <div class="col-12 col-lg-5">
+                <h4 class="text-primary">
+                    {{ city }}{% if country %} - {{ country }}{% endif %}
+                </h4>
 
-        <form action="{% url 'index' %}" method="get" autocomplete="off">
+                <div class="mb-2">
+                    <label for="locais" class="form-label">Buscar por:</label>
+                    <input type="text" name="key" class="form-control"
+                           placeholder="Digite um termo de busca" required>
+                </div>
 
-            <h1>
-                <a href="{% url 'index' %}" class="text-primary text-decoration-none">BUSCA LOCAIS</a>
-            </h1>
+                <div class="mb-2">
+                    <input type="text" name="loc" class="form-control"
+                           placeholder="Digite uma cidade">
+                </div>
 
-            <h4>
-                {{ city }}{% if country %} - {{ country }}{% endif %}
-            </h4>
+                <button type="submit" class="btn btn-primary">
+                    Buscar
+                </button>
+            </form>
 
-            <div class="form-group mb-2">
-                <input type="text"
-                       name="key"
-                       class="form-control"
-                       placeholder="Digite um termo de busca"
-                       required>
-            </div>
+            <hr>
 
-            <div class="form-group mb-2">
-                <input type="text"
-                       name="loc"
-                       class="form-control"
-                       placeholder="Digite uma cidade">
-            </div>
+            {% if has_error %}
+                <div class="alert alert-danger">
+                    Nenhum estabelecimento encontrado em {{ city }}
+                </div>
 
-            <button type="submit" class="btn btn-primary">
-                Buscar
-            </button>
+            {% elif itens.businesses %}
+                <h5 class="mb-3">RESULTADOS</h5>
 
-        </form>
+                <div class="list-group" id="resultsList">
+                    {% for biz in itens.businesses %}
+                        {% if biz.coordinates.latitude and biz.coordinates.longitude %}
+                            <button
+                                type="button"
+                                class="list-group-item list-group-item-action"
+                                data-lat="{{ biz.coordinates.latitude }}"
+                                data-lon="{{ biz.coordinates.longitude }}"
+                            >
+                                <strong>{{ biz.name }}</strong><br>
+                                <small class="text-muted">{{ city }}</small>
+                            </button>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endif %}
 
+        </div>
 
-        <hr>
-
-        {% if has_error %}
-            <div class="alert alert-danger">
-                Nenhum estabelecimento encontrado em {{ city }}
-            </div>
-
-        {% elif itens.businesses %}
-            <h5>RESULTADOS</h5>
-<div class="list-group" id="resultsList">
-
-    {% for biz in itens.businesses %}
-        {% if biz.coordinates.latitude and biz.coordinates.longitude %}
-            <button
-                type="button"
-                class="list-group-item list-group-item-action"
-                data-lat="{{ biz.coordinates.latitude }}"
-                data-lon="{{ biz.coordinates.longitude }}"
-                data-name="{{ biz.name|escapejs }}"
-            >
-                <strong>{{ biz.name }}</strong><br>
-                <small class="text-muted">{{ city }}</small>
-            </button>
-        {% endif %}
-    {% endfor %}
-    
-
-</div>
-
+        <!-- MAPA -->
+        {% if itens.businesses|length > 0 %}
+            {% include "maps.html" %}
         {% endif %}
 
     </div>
 
-    {% if itens.businesses|length > 0 %}
-        {% include "maps.html" %}
-    {% endif %}
 </div>
-</div>
-</div>
+{% endblock content %}
+
+{% comment %} {% block extra_js %}
+{% if itens.businesses|length > 0 %}
+
+<script>
+        const lat = {{ itens.businesses.0.coordinates.latitude | safe }};
+        const lon = {{ itens.businesses.0.coordinates.longitude | safe }};
+
+        const map = L.map('mapDiv').setView([lat, lon], 13);
+        const markers = {};
+
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        {% for biz in itens.businesses %}
+            {% if biz.coordinates.latitude and biz.coordinates.longitude %}
+                L.marker(
+                    [
+                        {{ biz.coordinates.latitude | safe }},
+                        {{ biz.coordinates.longitude  | safe }}
+                    ]
+                )
+                .addTo(map)
+                .bindPopup(
+                    "<strong>{{ biz.name|escapejs }}</strong><br>{{ city|escapejs }}"
+                );
+            {% endif %}
+        {% endfor %}
+
+</script>
+
+
+{% endif %}
+{% endblock %} {% endcomment %}
+
+
+{% block extra_js %}
+{% if itens.businesses|length > 0 %}
+<script>
+    const lat = {{ itens.businesses.0.coordinates.latitude | safe }};
+    const lon = {{ itens.businesses.0.coordinates.longitude | safe }};
+
+    if (!window._leafletMap) {
+        window._leafletMap = L.map('mapDiv').setView([lat, lon], 13);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(window._leafletMap);
+    }
+
+    const map = window._leafletMap;
+
+    {% for biz in itens.businesses %}
+        {% if biz.coordinates.latitude and biz.coordinates.longitude %}
+            L.marker(
+                [
+                    {{ biz.coordinates.latitude | safe }},
+                    {{ biz.coordinates.longitude  | safe }}
+                ]
+            )
+            .addTo(map)
+            .bindPopup(
+                "<strong>{{ biz.name|escapejs }}</strong><br>{{ city|escapejs }}"
+            );
+        {% endif %}
+    {% endfor %}
+
+
+</script>
+{% endif %}
 {% endblock %}

@@ -4,6 +4,7 @@ Django settings for geo project.
 
 from pathlib import Path
 import os
+from django.core.exceptions import ImproperlyConfigured
 
 # =========================
 # BASE DIR
@@ -21,6 +22,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ["SECRET_KEY"]
 # YELP_API_KEY = os.environ["YELP_API_KEY"]
 YELP_API_KEY = os.environ["YELP_API_KEY"]
+
+if not YELP_API_KEY:
+    raise ImproperlyConfigured(
+        "\n************* ⚠ YELP_API_KEY não foi definida no ambiente.⚠ "
+        "*****************"
+    )
 
 # =========================
 # DEBUG & ALLOWED HOSTS

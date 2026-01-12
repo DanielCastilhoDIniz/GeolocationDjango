@@ -24,7 +24,8 @@
         }
         #mapDiv {
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
-}
+            border-radius: 8px;
+        }
 
     </style>
 
@@ -41,37 +42,8 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
+
     {% block extra_js %}{% endblock %}
-    {% block scripts %}
-    <script>
-        const lat = {{ itens.businesses.0.coordinates.latitude | safe }};
-        const lon = {{ itens.businesses.0.coordinates.longitude | safe }};
 
-        const map = L.map('mapDiv').setView([lat, lon], 13);
-        const markers = {};
-
-
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 18,
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
-
-        {% for biz in itens.businesses %}
-            {% if biz.coordinates.latitude and biz.coordinates.longitude %}
-                L.marker(
-                    [
-                        {{ biz.coordinates.latitude | safe }},
-                        {{ biz.coordinates.longitude  | safe }}
-                    ]
-                )
-                .addTo(map)
-                .bindPopup(
-                    "<strong>{{ biz.name|escapejs }}</strong><br>{{ city|escapejs }}"
-                );
-            {% endif %}
-        {% endfor %}
-
-    </script>
-    {% endblock %}
 </body>
 </html>
